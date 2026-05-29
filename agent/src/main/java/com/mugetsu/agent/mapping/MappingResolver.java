@@ -36,6 +36,9 @@ public final class MappingResolver {
             r.interactionManagerInternalName = r.interactionManagerClass.getName().replace('.', '/');
         if (r.inGameHudClass != null)
             r.inGameHudInternalName = r.inGameHudClass.getName().replace('.', '/');
+        r.keyboardHandlerClass = findClass(loaded, KnownMappings.CLASSES.get("KeyboardHandler"), null);
+        if (r.keyboardHandlerClass != null)
+            r.keyboardHandlerInternalName = r.keyboardHandlerClass.getName().replace('.', '/');
 
         // --- Resolve MC instance + game classloader ---
         if (r.minecraftClass != null) {
@@ -104,6 +107,27 @@ public final class MappingResolver {
             if (m != null) {
                 r.hudRenderMethodName = m.getName();
                 r.hudRenderMethodDesc = Type.getMethodDescriptor(m);
+            }
+        }
+
+        // --- Resolve KeyboardHandler.onKey ---
+        if (r.keyboardHandlerClass != null) {
+            // onKey is private; use getDeclaredMethods to find it
+            for (java.lang.reflect.Method m : r.keyboardHandlerClass.getDeclaredMethods()) {
+                String n = m.getName();
+                boolean nameMatch = false;
+                for (String candidate : KnownMappings.METHODS.get("KeyboardHandler.onKey")) {
+                    if (n.equals(candidate)) { nameMatch = true; break; }
+                }
+                // Signature: (JIIII)V — window(long) + key,scancode,action,mods(int)
+                if (nameMatch && m.getParameterCount() == 5
+                        && m.getParameterTypes()[0] == long.class
+                        && m.getReturnType() == void.class) {
+                    r.onKeyMethodName = m.getName();
+                    r.onKeyMethodDesc = Type.getMethodDescriptor(m);
+                    System.out.println("[Mugetsu] onKey() -> " + m.getName() + " " + r.onKeyMethodDesc);
+                    break;
+                }
             }
         }
 

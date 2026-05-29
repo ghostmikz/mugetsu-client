@@ -67,5 +67,12 @@ public final class CallbackRegistry {
         return event.isCancelled();
     }
 
+    // Called from KeyboardHandlerPatch on the render/main thread — SAFE, no GLFW call needed
+    public static void onKeyEvent(int key, int action) {
+        if (eventBus == null) return;
+        if (action == 2) return; // ignore REPEAT
+        eventBus.post(new EventKey(key, action));
+    }
+
     private CallbackRegistry() {}
 }

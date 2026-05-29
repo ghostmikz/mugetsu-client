@@ -25,7 +25,7 @@ public final class PatchRegistry {
         register(names.gameRendererInternalName,        (cv, r) -> new GameRendererPatch(cv, r), names);
         register(names.interactionManagerInternalName,  (cv, r) -> new PlayerControllerPatch(cv, r), names);
         register(names.inGameHudInternalName,           (cv, r) -> new GuiPatch(cv, r), names);
-        // LevelRenderer patch not implemented yet — placeholder
+        register(names.keyboardHandlerInternalName,     (cv, r) -> new KeyboardHandlerPatch(cv, r), names);
     }
 
     private void register(String internalName,

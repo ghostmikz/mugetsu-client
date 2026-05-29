@@ -1,13 +1,17 @@
 package com.mugetsu.agent.hook;
 
 import com.mugetsu.agent.mapping.ResolvedNames;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
 public class HookTransformer implements ClassFileTransformer {
+
+    // ASM 9.7.1 supports up to class version 68 (Java 24).
+    // For newer versions (Java 25+ = 69+), we temporarily downgrade for reading
+    // and restore the original version in the output so the JVM still accepts it.
+    private static final int ASM_MAX_VERSION = 68;
 
     private final ResolvedNames names;
     public static boolean verbose = false;
@@ -27,18 +31,36 @@ public class HookTransformer implements ClassFileTransformer {
         try {
             if (verbose) System.out.println("[Mugetsu] Patching " + className);
 
-            ClassReader reader = new ClassReader(classfileBuffer);
-            // Use the class's own loader (Fabric's KnotClassLoader), not names.gameLoader.
-            // GameClassWriter uses COMPUTE_MAXS only — safe on Mixin-transformed classes.
+            // Read original class version (bytes 6-7 in .class header)
+            final int originalMajor = ((classfileBuffer[6] & 0xFF) << 8) | (classfileBuffer[7] & 0xFF);
+
+            // Downgrade version if newer than what ASM supports
+            byte[] readBuffer = classfileBuffer;
+            if (originalMajor > ASM_MAX_VERSION) {
+                readBuffer = classfileBuffer.clone();
+                readBuffer[6] = 0;
+                readBuffer[7] = (byte) ASM_MAX_VERSION;
+            }
+
+            ClassReader reader = new ClassReader(readBuffer);
+            // Use the class's own loader (Fabric KnotClassLoader), COMPUTE_FRAMES for correctness.
             GameClassWriter writer = new GameClassWriter(loader);
-            ClassVisitor chain = PatchRegistry.INSTANCE.applyPatches(className, writer, names);
-            // SKIP_FRAMES: preserve original frames; combined with COMPUTE_MAXS this is
-            // the safest option for already-Mixin-transformed bytecode.
+
+            // Wrap with a visitor that restores the original version in the output
+            ClassVisitor versionRestorer = new ClassVisitor(Opcodes.ASM9, writer) {
+                @Override
+                public void visit(int version, int access, String name,
+                                  String signature, String superName, String[] interfaces) {
+                    super.visit(originalMajor, access, name, signature, superName, interfaces);
+                }
+            };
+
+            ClassVisitor chain = PatchRegistry.INSTANCE.applyPatches(className, versionRestorer, names);
             reader.accept(chain, ClassReader.EXPAND_FRAMES);
             return writer.toByteArray();
         } catch (Throwable t) {
             System.err.println("[Mugetsu] Transform failed for " + className + ": " + t);
-            return null; // null = leave original bytecode untouched
+            return null;
         }
     }
 }

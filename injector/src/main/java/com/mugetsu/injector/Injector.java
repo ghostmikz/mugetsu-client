@@ -352,7 +352,15 @@ public class Injector extends JFrame {
     // ===================================================================
 
     public static void main(String[] args) {
-        // Wayland / GNOME rendering quality
+        // HiDPI / Wayland scaling — detect GDK_SCALE or fall back to auto
+        String gdkScale = System.getenv("GDK_SCALE");
+        if (gdkScale != null && !gdkScale.isEmpty()) {
+            System.setProperty("sun.java2d.uiScale", gdkScale);
+        } else {
+            // "auto" lets the JDK query the display server for the scale factor
+            System.setProperty("sun.java2d.uiScale", "auto");
+        }
+        // Rendering quality
         System.setProperty("awt.useSystemAAFontSettings", "on");
         System.setProperty("swing.aatext", "true");
         System.setProperty("sun.java2d.xrender", "True");

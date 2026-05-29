@@ -26,6 +26,7 @@ public class ResolvedNames {
     public String levelRendererInternalName;
     public String interactionManagerInternalName;
     public String inGameHudInternalName;
+    public String keyboardHandlerInternalName;
 
     // Resolved method names (for ASM patch method matching)
     public String travelMethodName;
@@ -42,6 +43,9 @@ public class ResolvedNames {
     public String attackMethodDesc;
     public String hudRenderMethodName;
     public String hudRenderMethodDesc;
+    public Class<?> keyboardHandlerClass;
+    public String onKeyMethodName;
+    public String onKeyMethodDesc;
 
     // Cached reflective fields for modules
     public Field playerField;
@@ -73,7 +77,7 @@ public class ResolvedNames {
     /** Returns the list of classes that HookTransformer should retransform. */
     public Class<?>[] getTargetClasses() {
         return new Class<?>[]{ entityClass, gameRendererClass, levelRendererClass,
-                               interactionManagerClass, inGameHudClass };
+                               interactionManagerClass, inGameHudClass, keyboardHandlerClass };
     }
 
     public boolean isCriticalResolved() {

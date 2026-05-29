@@ -8,7 +8,6 @@ import com.mugetsu.agent.mapping.MappingResolver;
 import com.mugetsu.agent.mapping.ResolvedNames;
 import com.mugetsu.agent.module.ModuleManager;
 import com.mugetsu.common.event.EventBus;
-import com.mugetsu.common.event.EventKey;
 import com.mugetsu.common.event.EventUpdate;
 
 import java.lang.instrument.Instrumentation;
@@ -101,7 +100,6 @@ public class MugetsuClient {
 
     private static void startTickThread(ResolvedNames r, EventBus bus) {
         Thread t = new Thread(() -> {
-            boolean[] prevKeys = new boolean[400];
             while (!Thread.currentThread().isInterrupted()) {
                 try { Thread.sleep(50); } catch (InterruptedException e) { break; }
 
@@ -121,17 +119,8 @@ public class MugetsuClient {
                     } catch (Throwable ignored) {}
                     bus.post(new EventUpdate(player, x, y, z, 0, 0, false));
                 }
-
-                if (r.glfwGetKey != null && r.windowHandle != 0) {
-                    for (int key = 32; key < prevKeys.length; key++) {
-                        boolean down = false;
-                        try { down = (int) r.glfwGetKey.invoke(null, r.windowHandle, key) == 1; }
-                        catch (Throwable ignored) {}
-                        if (down  && !prevKeys[key]) bus.post(new EventKey(key, 1));
-                        if (!down &&  prevKeys[key]) bus.post(new EventKey(key, 0));
-                        prevKeys[key] = down;
-                    }
-                }
+                // Key events are now posted by KeyboardHandlerPatch on the render thread.
+                // Never call glfwGetKey from a background thread — GLFW is not thread-safe.
             }
         }, "Mugetsu-Tick");
         t.setDaemon(true);

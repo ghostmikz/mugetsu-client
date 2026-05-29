@@ -61,6 +61,11 @@ public final class KnownMappings {
             "net.minecraft.client.Options",         // Forge 1.17+
             "net.minecraft.client.option.GameOptions", // Fabric Yarn
             "net.minecraft.class_315"               // Fabric intermediary
+        }),
+        Map.entry("KeyboardHandler", new String[]{
+            "net.minecraft.client.KeyboardHandler",         // Forge 1.17+
+            "net.minecraft.client.Keyboard",                // Fabric Yarn
+            "net.minecraft.class_309"                       // Fabric intermediary
         })
     );
 
@@ -106,6 +111,12 @@ public final class KnownMappings {
             "render",           // Forge + Fabric
             "renderHotbar",     // fallback
             "method_1744"       // Fabric intermediary
+        }),
+        Map.entry("KeyboardHandler.onKey", new String[]{
+            "onKey",            // Forge 1.17+ and Fabric Yarn
+            "keyPress",         // Forge alt name
+            "method_1454",      // Fabric intermediary 1.16-1.20
+            "method_22673"      // Fabric intermediary 1.21+
         })
     );
 
