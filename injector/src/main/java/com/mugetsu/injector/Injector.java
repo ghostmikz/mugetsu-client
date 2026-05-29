@@ -13,16 +13,14 @@ import java.util.List;
 
 public class Injector extends JFrame {
 
-    // Void Purple palette
-    private static final Color C_BG_DARK   = new Color(0x0A0A14);
-    private static final Color C_BG_PANEL  = new Color(0x14141E);
-    private static final Color C_ACCENT    = new Color(0x7722CC);
-    private static final Color C_HIGHLIGHT = new Color(0x9933FF);
-    private static final Color C_TEXT      = new Color(0xE0E0FF);
-    private static final Color C_DIM       = new Color(0xBBBBEE);
-    private static final Color C_SEL_BG    = new Color(0x2A1040);
-    private static final Color C_OK        = new Color(0x44DD88);
-    private static final Color C_ERR       = new Color(0xFF4466);
+    private static final Color C_BG       = new Color(0x0A0A14);
+    private static final Color C_PANEL    = new Color(0x14141E);
+    private static final Color C_ACCENT   = new Color(0x7722CC);
+    private static final Color C_TEXT     = new Color(0xE0E0FF);
+    private static final Color C_DIM      = new Color(0xBBBBEE);
+    private static final Color C_SEL      = new Color(0x2A1040);
+    private static final Color C_OK       = new Color(0x44DD88);
+    private static final Color C_ERR      = new Color(0xFF4466);
 
     private final DefaultListModel<String> listModel = new DefaultListModel<>();
     private final JList<String> processList          = new JList<>(listModel);
@@ -38,97 +36,89 @@ public class Injector extends JFrame {
 
     private void buildUI() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(620, 440);
+        setSize(640, 460);
         setLocationRelativeTo(null);
         setResizable(false);
 
         JPanel root = new JPanel(new BorderLayout(0, 0));
-        root.setBackground(C_BG_DARK);
+        root.setBackground(C_BG);
         setContentPane(root);
 
-        root.add(buildHeader(), BorderLayout.NORTH);
+        root.add(buildBrand(),  BorderLayout.NORTH);
         root.add(buildCenter(), BorderLayout.CENTER);
         root.add(buildBottom(), BorderLayout.SOUTH);
 
         setVisible(true);
     }
 
-    // ---- Header ----
-    private JPanel buildHeader() {
-        JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(C_ACCENT);
-        header.setBorder(new EmptyBorder(10, 16, 10, 16));
+    // Branding strip below GNOME's native title bar
+    private JPanel buildBrand() {
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(C_PANEL);
+        p.setBorder(new EmptyBorder(8, 14, 8, 14));
 
-        JLabel name = new JLabel("Mugetsu Client");
-        name.setFont(tryFont("Segoe UI", Font.BOLD, 20));
-        name.setForeground(Color.WHITE);
-
-        JLabel sub = new JLabel("Injection Interface");
+        JLabel sub = new JLabel("Injection Interface  —  Mugetsu Client");
         sub.setFont(tryFont("Segoe UI", Font.PLAIN, 11));
-        sub.setForeground(new Color(0xCCAEFF));
+        sub.setForeground(new Color(0x9966CC));
+        p.add(sub, BorderLayout.WEST);
 
-        JPanel text = new JPanel(new GridLayout(2, 1, 0, 1));
-        text.setOpaque(false);
-        text.add(name);
-        text.add(sub);
-        header.add(text, BorderLayout.CENTER);
-        return header;
+        JSeparator sep = new JSeparator();
+        sep.setForeground(C_ACCENT.darker());
+        p.add(sep, BorderLayout.SOUTH);
+        return p;
     }
 
-    // ---- Process list ----
     private JPanel buildCenter() {
-        JPanel panel = new JPanel(new BorderLayout(0, 6));
-        panel.setBackground(C_BG_DARK);
-        panel.setBorder(new EmptyBorder(10, 12, 6, 12));
+        JPanel p = new JPanel(new BorderLayout(0, 6));
+        p.setBackground(C_BG);
+        p.setBorder(new EmptyBorder(10, 12, 6, 12));
 
-        JLabel title = new JLabel("Minecraft Processes");
-        title.setFont(tryFont("Segoe UI", Font.BOLD, 11));
-        title.setForeground(C_DIM);
-        panel.add(title, BorderLayout.NORTH);
+        JLabel lbl = new JLabel("Minecraft Processes");
+        lbl.setFont(tryFont("Segoe UI", Font.BOLD, 11));
+        lbl.setForeground(C_DIM);
+        p.add(lbl, BorderLayout.NORTH);
 
-        processList.setBackground(C_BG_PANEL);
+        processList.setBackground(C_PANEL);
         processList.setForeground(C_DIM);
         processList.setFont(tryFont("JetBrains Mono", Font.PLAIN, 12));
         processList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        processList.setCellRenderer(new ProcessCellRenderer());
+        processList.setCellRenderer(new ProcessRenderer());
         processList.setBorder(new EmptyBorder(4, 6, 4, 6));
         processList.setFixedCellHeight(26);
 
         JScrollPane scroll = new JScrollPane(processList);
         scroll.setBorder(BorderFactory.createLineBorder(C_ACCENT.darker(), 1));
-        scroll.getViewport().setBackground(C_BG_PANEL);
-        panel.add(scroll, BorderLayout.CENTER);
-        return panel;
+        scroll.getViewport().setBackground(C_PANEL);
+        p.add(scroll, BorderLayout.CENTER);
+        return p;
     }
 
-    // ---- Bottom bar ----
     private JPanel buildBottom() {
-        JPanel bar = new JPanel(new BorderLayout(8, 0));
-        bar.setBackground(C_BG_DARK);
-        bar.setBorder(new EmptyBorder(4, 12, 12, 12));
+        JPanel p = new JPanel(new BorderLayout(8, 0));
+        p.setBackground(C_BG);
+        p.setBorder(new EmptyBorder(4, 12, 12, 12));
 
-        JPanel statusArea = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-        statusArea.setBackground(C_BG_DARK);
+        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        left.setBackground(C_BG);
         statusDot.setPreferredSize(new Dimension(9, 9));
         statusDot.setBackground(C_DIM);
         statusLabel.setFont(tryFont("Segoe UI", Font.PLAIN, 11));
         statusLabel.setForeground(C_DIM);
-        statusArea.add(statusDot);
-        statusArea.add(statusLabel);
+        left.add(statusDot);
+        left.add(statusLabel);
 
-        JButton refreshBtn = makeButton("Refresh", false);
-        JButton injectBtn  = makeButton("Inject",  true);
-        refreshBtn.addActionListener(e -> refreshProcesses());
-        injectBtn.addActionListener(e -> inject());
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        right.setBackground(C_BG);
+        JButton refresh = makeBtn("Refresh", false);
+        JButton inject  = makeBtn("Inject",  true);
+        refresh.addActionListener(e -> refreshProcesses());
+        inject.addActionListener(e -> inject());
+        right.add(refresh);
+        right.add(inject);
 
-        JPanel btnArea = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        btnArea.setBackground(C_BG_DARK);
-        btnArea.add(refreshBtn);
-        btnArea.add(injectBtn);
-
-        bar.add(statusArea, BorderLayout.CENTER);
-        bar.add(btnArea,    BorderLayout.EAST);
-        return bar;
+        p.add(left,  BorderLayout.CENTER);
+        p.add(right, BorderLayout.EAST);
+        return p;
     }
 
     // ---- Logic ----
@@ -137,10 +127,10 @@ public class Injector extends JFrame {
         listModel.clear();
         foundVMs.clear();
         for (VirtualMachineDescriptor vm : VirtualMachine.list()) {
-            String name = vm.displayName().toLowerCase();
-            if (name.contains("minecraft") || name.contains("net.minecraft")
-                    || name.contains("com.mojang") || name.contains("launchwrapper")
-                    || name.contains("fabriclauncher") || name.contains("gradleclient")) {
+            String n = vm.displayName().toLowerCase();
+            if (n.contains("minecraft") || n.contains("net.minecraft")
+                    || n.contains("com.mojang") || n.contains("launchwrapper")
+                    || n.contains("fabriclauncher") || n.contains("gradleclient")) {
                 foundVMs.add(vm);
                 listModel.addElement(String.format("[%s]  %s", vm.id(), vm.displayName()));
             }
@@ -157,8 +147,8 @@ public class Injector extends JFrame {
         int idx = processList.getSelectedIndex();
         if (idx < 0 || idx >= foundVMs.size()) { setStatus("Select a process first.", false); return; }
 
-        File agentJar = resolveAgentJar();
-        if (agentJar == null || !agentJar.exists()) {
+        File agent = resolveAgentJar();
+        if (agent == null || !agent.exists()) {
             setStatus("agent.jar not found — run: ./gradlew :agent:jar", false);
             return;
         }
@@ -169,7 +159,7 @@ public class Injector extends JFrame {
         new Thread(() -> {
             try {
                 VirtualMachine vm = VirtualMachine.attach(desc.id());
-                vm.loadAgent(agentJar.getAbsolutePath());
+                vm.loadAgent(agent.getAbsolutePath());
                 vm.detach();
                 SwingUtilities.invokeLater(() ->
                     setStatus("Injected into PID " + desc.id() + ".  Press RShift in-game.", true));
@@ -183,8 +173,8 @@ public class Injector extends JFrame {
         try {
             File self = new File(Injector.class.getProtectionDomain()
                 .getCodeSource().getLocation().toURI());
-            File sibling = new File(self.getParent(), "agent.jar");
-            if (sibling.exists()) return sibling;
+            File s = new File(self.getParent(), "agent.jar");
+            if (s.exists()) return s;
         } catch (Exception ignored) {}
         if (new File("agent.jar").exists()) return new File("agent.jar");
         return new File("dist/agent.jar");
@@ -200,23 +190,16 @@ public class Injector extends JFrame {
 
     // ---- Helpers ----
 
-    private JButton makeButton(String text, boolean primary) {
-        JButton btn = new JButton(text);
-        btn.setFont(tryFont("Segoe UI", Font.BOLD, 13));
-        btn.setPreferredSize(new Dimension(110, 34));
-        btn.setFocusPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        // FlatLaf client properties for rounded style
-        btn.putClientProperty("JButton.buttonType", "roundRect");
-        if (primary) {
-            btn.setBackground(C_ACCENT);
-            btn.setForeground(Color.WHITE);
-            btn.putClientProperty("JComponent.outline", "button");
-        } else {
-            btn.setBackground(C_BG_PANEL);
-            btn.setForeground(C_TEXT);
-        }
-        return btn;
+    private JButton makeBtn(String text, boolean primary) {
+        JButton b = new JButton(text);
+        b.setFont(tryFont("Segoe UI", Font.BOLD, 13));
+        b.setPreferredSize(new Dimension(110, 34));
+        b.setFocusPainted(false);
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        b.putClientProperty("JButton.buttonType", "roundRect");
+        if (primary) { b.setBackground(C_ACCENT); b.setForeground(Color.WHITE); }
+        else         { b.setBackground(C_PANEL);  b.setForeground(C_TEXT); }
+        return b;
     }
 
     private static Font tryFont(String name, int style, int size) {
@@ -224,46 +207,66 @@ public class Injector extends JFrame {
         return f.getFamily().equalsIgnoreCase(name) ? f : new Font("SansSerif", style, size);
     }
 
-    private class ProcessCellRenderer extends DefaultListCellRenderer {
+    private class ProcessRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value,
-                int idx, boolean selected, boolean focused) {
-            JLabel lbl = (JLabel) super.getListCellRendererComponent(
-                list, value, idx, selected, focused);
-            lbl.setFont(tryFont("JetBrains Mono", Font.PLAIN, 12));
-            lbl.setBorder(new EmptyBorder(3, 8, 3, 8));
-            lbl.setBackground(selected ? C_SEL_BG : (idx % 2 == 0 ? C_BG_PANEL : new Color(0x11111A)));
-            lbl.setForeground(selected ? C_TEXT : C_DIM);
-            return lbl;
+                int idx, boolean sel, boolean focus) {
+            JLabel l = (JLabel) super.getListCellRendererComponent(list, value, idx, sel, focus);
+            l.setFont(tryFont("JetBrains Mono", Font.PLAIN, 12));
+            l.setBorder(new EmptyBorder(3, 8, 3, 8));
+            l.setBackground(sel ? C_SEL : (idx % 2 == 0 ? C_PANEL : new Color(0x11111A)));
+            l.setForeground(sel ? C_TEXT : C_DIM);
+            return l;
         }
     }
 
     // ---- Entry point ----
 
     public static void main(String[] args) {
-        // HiDPI / Wayland scaling
-        String gdkScale = System.getenv("GDK_SCALE");
-        System.setProperty("sun.java2d.uiScale",
-            (gdkScale != null && !gdkScale.isEmpty()) ? gdkScale : "auto");
+        applyScale();
         System.setProperty("awt.useSystemAAFontSettings", "on");
         System.setProperty("swing.aatext", "true");
 
         FlatDarkLaf.setup();
-
-        // Void Purple accent applied globally to FlatLaf
-        UIManager.put("Component.accentColor",             new Color(0x7722CC));
-        UIManager.put("Button.default.background",         new Color(0x7722CC));
-        UIManager.put("Button.default.hoverBackground",    new Color(0x9933FF));
-        UIManager.put("Button.default.pressedBackground",  new Color(0x551199));
-        UIManager.put("ScrollBar.thumb",                   new Color(0x551199));
-        UIManager.put("ScrollBar.thumbHoverColor",         new Color(0x7722CC));
-        UIManager.put("TextField.caretForeground",         new Color(0x9933FF));
-        UIManager.put("List.selectionBackground",          new Color(0x2A1040));
-        UIManager.put("List.selectionForeground",          new Color(0xE0E0FF));
-
-        // Let FlatLaf paint window decorations (works on Wayland)
-        JFrame.setDefaultLookAndFeelDecorated(true);
+        UIManager.put("Component.accentColor",          new Color(0x7722CC));
+        UIManager.put("Button.default.background",      new Color(0x7722CC));
+        UIManager.put("Button.default.hoverBackground", new Color(0x9933FF));
+        UIManager.put("ScrollBar.thumb",                new Color(0x551199));
+        UIManager.put("ScrollBar.thumbHoverColor",      new Color(0x7722CC));
+        UIManager.put("List.selectionBackground",       new Color(0x2A1040));
+        UIManager.put("List.selectionForeground",       new Color(0xE0E0FF));
+        // Let GNOME/the compositor own window decorations — no FlatLaf chrome
+        JFrame.setDefaultLookAndFeelDecorated(false);
 
         SwingUtilities.invokeLater(Injector::new);
+    }
+
+    private static void applyScale() {
+        // 1. Explicit env var (user can set GDK_SCALE=2 before launching)
+        String scale = System.getenv("GDK_SCALE");
+
+        // 2. Fractional GDK scale
+        if (scale == null) scale = System.getenv("GDK_DPI_SCALE");
+
+        // 3. Try to read GNOME scaling-factor via gsettings
+        if (scale == null) {
+            try {
+                Process p = Runtime.getRuntime().exec(
+                    new String[]{"gsettings", "get",
+                        "org.gnome.desktop.interface", "scaling-factor"});
+                String out = new String(p.getInputStream().readAllBytes()).strip();
+                if (!out.equals("0") && !out.isEmpty()) scale = out;
+            } catch (Throwable ignored) {}
+        }
+
+        // 4. Derive from screen DPI reported by AWT
+        if (scale == null) {
+            int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+            if (dpi > 120) scale = String.valueOf(Math.round(dpi / 96.0));
+        }
+
+        if (scale != null && !scale.isEmpty()) {
+            System.setProperty("sun.java2d.uiScale", scale.trim());
+        }
     }
 }
