@@ -49,6 +49,8 @@ public class Injector extends JFrame {
         root.add(buildHeader(), BorderLayout.NORTH);
         root.add(buildCenter(), BorderLayout.CENTER);
         root.add(buildBottom(), BorderLayout.SOUTH);
+
+        setVisible(true);
     }
 
     // ---- Header ----
