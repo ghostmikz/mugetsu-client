@@ -79,7 +79,8 @@ public class ResolvedNames {
 
     /** Returns the list of classes that HookTransformer should retransform. */
     public Class<?>[] getTargetClasses() {
-        return new Class<?>[]{ minecraftClass, entityClass, gameRendererClass, levelRendererClass,
+        // minecraftClass intentionally excluded — retransforming the MC singleton crashes on Fabric
+        return new Class<?>[]{ entityClass, gameRendererClass, levelRendererClass,
                                interactionManagerClass, inGameHudClass, keyboardHandlerClass };
     }
 

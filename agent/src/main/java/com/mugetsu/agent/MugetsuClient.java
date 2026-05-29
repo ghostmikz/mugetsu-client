@@ -101,10 +101,17 @@ public class MugetsuClient {
     }
 
     private static void startTickThread(ResolvedNames r, EventBus bus) {
+        // Find Minecraft.execute(Runnable) — posts a task to the game thread (GLFW-safe)
+        Method executeMethod = null;
+        try { executeMethod = r.minecraftClass.getMethod("execute", Runnable.class); }
+        catch (Throwable ignored) {}
+        final Method exec = executeMethod;
+
         Thread t = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try { Thread.sleep(50); } catch (InterruptedException e) { break; }
 
+                // Post player-position EventUpdate (no GLFW, safe from any thread)
                 Object player = getField(r.playerField, r.mcInstance);
                 if (player != null) {
                     CallbackRegistry.localPlayerRef = player;
@@ -121,8 +128,13 @@ public class MugetsuClient {
                     } catch (Throwable ignored) {}
                     bus.post(new EventUpdate(player, x, y, z, 0, 0, false));
                 }
-                // Key events are now posted by KeyboardHandlerPatch on the render thread.
-                // Never call glfwGetKey from a background thread — GLFW is not thread-safe.
+
+                // Delegate GLFW key polling to the game thread via Minecraft.execute()
+                // glfwGetKey must only be called on the thread that owns the GLFW window
+                if (exec != null && r.mcInstance != null) {
+                    try { exec.invoke(r.mcInstance, (Runnable) CallbackRegistry::onTick); }
+                    catch (Throwable ignored) {}
+                }
             }
         }, "Mugetsu-Tick");
         t.setDaemon(true);
