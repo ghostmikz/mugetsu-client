@@ -1,5 +1,5 @@
 dependencies {
-    implementation 'com.formdev:flatlaf:3.4'
+    // no extra dependencies — plain Swing
 }
 
 jar {
@@ -10,12 +10,6 @@ jar {
         attributes(
             'Main-Class': 'com.mugetsu.injector.Injector'
         )
-    }
-
-    from {
-        configurations.runtimeClasspath.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
     }
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
