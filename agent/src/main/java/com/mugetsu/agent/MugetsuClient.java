@@ -55,17 +55,18 @@ public class MugetsuClient {
         transformer = new HookTransformer(resolved);
         inst.addTransformer(transformer, true);
 
-        try {
-            Class<?>[] targets = resolved.getTargetClasses();
-            java.util.List<Class<?>> valid = new java.util.ArrayList<>();
-            for (Class<?> c : targets) if (c != null) valid.add(c);
-            if (!valid.isEmpty()) {
-                inst.retransformClasses(valid.toArray(new Class[0]));
-                System.out.println("[Mugetsu] Retransformed " + valid.size() + " classes.");
+        // Retransform one class at a time — if one fails (e.g. Mixin conflict) the rest still apply
+        int ok = 0;
+        for (Class<?> c : resolved.getTargetClasses()) {
+            if (c == null) continue;
+            try {
+                inst.retransformClasses(c);
+                ok++;
+            } catch (Throwable t) {
+                System.err.println("[Mugetsu] Retransform skipped " + c.getName() + ": " + t);
             }
-        } catch (Throwable t) {
-            System.err.println("[Mugetsu] Retransform failed: " + t);
         }
+        System.out.println("[Mugetsu] Retransformed " + ok + " classes.");
 
         startTickThread(resolved, bus);
         System.out.println("[Mugetsu] Ready. Press RShift for ClickGUI.");
@@ -84,12 +85,10 @@ public class MugetsuClient {
 
         // 3. Retransform without the transformer in place — classes revert to original
         if (instrumentation != null && resolved != null) {
-            try {
-                Class<?>[] targets = resolved.getTargetClasses();
-                java.util.List<Class<?>> valid = new java.util.ArrayList<>();
-                for (Class<?> c : targets) if (c != null) valid.add(c);
-                if (!valid.isEmpty()) instrumentation.retransformClasses(valid.toArray(new Class[0]));
-            } catch (Throwable ignored) {}
+            for (Class<?> c : resolved.getTargetClasses()) {
+                if (c == null) continue;
+                try { instrumentation.retransformClasses(c); } catch (Throwable ignored) {}
+            }
         }
 
         // 4. Kill event bus and tick thread
