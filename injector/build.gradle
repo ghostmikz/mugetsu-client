@@ -1,6 +1,5 @@
 dependencies {
-    // tools.jar provides VirtualMachine (Attach API) — included in JDK, not JRE
-    // On JDK 9+, the module is jdk.attach and is included automatically
+    implementation 'com.formdev:flatlaf:3.4'
 }
 
 jar {
@@ -11,6 +10,12 @@ jar {
         attributes(
             'Main-Class': 'com.mugetsu.injector.Injector'
         )
+    }
+
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
     }
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
