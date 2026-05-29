@@ -1,0 +1,32 @@
+dependencies {
+    implementation project(':common')
+    implementation 'org.ow2.asm:asm:9.6'
+    implementation 'org.ow2.asm:asm-commons:9.6'
+    implementation 'org.ow2.asm:asm-util:9.6'
+    implementation 'org.ow2.asm:asm-tree:9.6'
+    implementation 'org.ow2.asm:asm-analysis:9.6'
+}
+
+jar {
+    archiveFileName = 'agent.jar'
+    destinationDirectory = file("$rootDir/dist")
+
+    manifest {
+        attributes(
+            'Agent-Class'             : 'com.mugetsu.agent.AgentMain',
+            'Can-Retransform-Classes' : 'true',
+            'Can-Redefine-Classes'    : 'true',
+            'Premain-Class'           : 'com.mugetsu.agent.AgentMain',
+            'Boot-Class-Path'         : 'agent.jar'
+        )
+    }
+
+    // Bundle ASM into the agent fat jar
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

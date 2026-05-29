@@ -1,0 +1,2 @@
+rootProject.name = 'mugetsu-client'
+include 'agent', 'injector', 'common'

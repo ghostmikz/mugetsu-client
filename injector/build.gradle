@@ -1,0 +1,17 @@
+dependencies {
+    // tools.jar provides VirtualMachine (Attach API) — included in JDK, not JRE
+    // On JDK 9+, the module is jdk.attach and is included automatically
+}
+
+jar {
+    archiveFileName = 'injector.jar'
+    destinationDirectory = file("$rootDir/dist")
+
+    manifest {
+        attributes(
+            'Main-Class': 'com.mugetsu.injector.Injector'
+        )
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
