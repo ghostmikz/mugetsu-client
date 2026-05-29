@@ -71,6 +71,10 @@ public final class KnownMappings {
 
     // Method name candidates — "ClassName.logical" → [candidate names...]
     public static final Map<String, String[]> METHODS = Map.ofEntries(
+        Map.entry("Minecraft.tick", new String[]{
+            "tick",         // Forge + Fabric Yarn (both use "tick")
+            "method_1523"   // Fabric intermediary
+        }),
         Map.entry("Entity.travel", new String[]{
             "travel",           // Forge / official
             "method_18866",     // Fabric intermediary 1.16-1.19

@@ -21,6 +21,7 @@ public final class PatchRegistry {
     public void init(ResolvedNames names) {
         registry.clear();
 
+        register(names.minecraftInternalName,            (cv, r) -> new MinecraftTickPatch(cv, r), names);
         register(names.entityInternalName,              (cv, r) -> new EntityPatch(cv, r), names);
         register(names.gameRendererInternalName,        (cv, r) -> new GameRendererPatch(cv, r), names);
         register(names.interactionManagerInternalName,  (cv, r) -> new PlayerControllerPatch(cv, r), names);

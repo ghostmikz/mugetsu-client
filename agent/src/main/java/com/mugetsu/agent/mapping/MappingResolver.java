@@ -44,7 +44,14 @@ public final class MappingResolver {
         if (r.minecraftClass != null) {
             r.mcInstance = getMcInstance(r.minecraftClass);
             r.gameLoader = r.minecraftClass.getClassLoader();
+            r.minecraftInternalName = r.minecraftClass.getName().replace('.', '/');
             System.out.println("[Mugetsu] MC class: " + r.minecraftClass.getName());
+            Method tick = resolveMethod(r.minecraftClass, KnownMappings.METHODS.get("Minecraft.tick"), 0, void.class);
+            if (tick != null) {
+                r.minecraftTickMethodName = tick.getName();
+                r.minecraftTickMethodDesc = Type.getMethodDescriptor(tick);
+                System.out.println("[Mugetsu] tick() -> " + tick.getName());
+            }
         }
 
         // --- Resolve fields on Minecraft class ---

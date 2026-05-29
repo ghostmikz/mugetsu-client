@@ -56,7 +56,9 @@ public class HookTransformer implements ClassFileTransformer {
             };
 
             ClassVisitor chain = PatchRegistry.INSTANCE.applyPatches(className, versionRestorer, names);
-            reader.accept(chain, ClassReader.EXPAND_FRAMES);
+            // SKIP_FRAMES: don't read existing frame data, let COMPUTE_FRAMES rebuild from scratch.
+            // Avoids VerifyError caused by Mixin-inserted frames confusing ASM on Java 25 classes.
+            reader.accept(chain, ClassReader.SKIP_FRAMES);
             return writer.toByteArray();
         } catch (Throwable t) {
             System.err.println("[Mugetsu] Transform failed for " + className + ": " + t);

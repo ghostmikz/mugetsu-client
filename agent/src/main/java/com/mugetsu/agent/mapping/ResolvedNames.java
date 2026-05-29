@@ -27,6 +27,9 @@ public class ResolvedNames {
     public String interactionManagerInternalName;
     public String inGameHudInternalName;
     public String keyboardHandlerInternalName;
+    public String minecraftInternalName;
+    public String minecraftTickMethodName;
+    public String minecraftTickMethodDesc;
 
     // Resolved method names (for ASM patch method matching)
     public String travelMethodName;
@@ -76,7 +79,7 @@ public class ResolvedNames {
 
     /** Returns the list of classes that HookTransformer should retransform. */
     public Class<?>[] getTargetClasses() {
-        return new Class<?>[]{ entityClass, gameRendererClass, levelRendererClass,
+        return new Class<?>[]{ minecraftClass, entityClass, gameRendererClass, levelRendererClass,
                                interactionManagerClass, inGameHudClass, keyboardHandlerClass };
     }
 

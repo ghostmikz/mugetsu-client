@@ -45,8 +45,10 @@ public class MugetsuClient {
         EventBus bus = EventBus.INSTANCE;
         ModuleManager.INSTANCE.init(resolved, bus);
 
-        CallbackRegistry.eventBus = bus;
+        CallbackRegistry.eventBus       = bus;
         CallbackRegistry.localPlayerRef = null;
+        CallbackRegistry.glfwGetKeyRef  = resolved.glfwGetKey;
+        CallbackRegistry.glfwWindowRef  = resolved.windowHandle;
 
         if (resolved.gameLoader != null) GlHelper.init(resolved.gameLoader);
 
