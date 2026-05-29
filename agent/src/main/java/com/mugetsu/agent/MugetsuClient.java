@@ -18,6 +18,7 @@ public class MugetsuClient {
 
     public static ResolvedNames resolved;
 
+    private static volatile boolean         initialized = false;
     private static volatile Thread          tickThread;
     private static volatile HookTransformer transformer;
     private static volatile Instrumentation instrumentation;
@@ -29,6 +30,11 @@ public class MugetsuClient {
     }
 
     public void start() {
+        if (initialized) {
+            System.out.println("[Mugetsu] Already injected — use UNINJECT first.");
+            return;
+        }
+        initialized   = true;
         instrumentation = inst;
         System.out.println("[Mugetsu] Resolving mappings...");
         resolved = MappingResolver.resolve(inst);
@@ -97,6 +103,7 @@ public class MugetsuClient {
         Thread tt = tickThread;
         if (tt != null) tt.interrupt();
 
+        initialized = false;
         System.out.println("[Mugetsu] Uninjected.");
     }
 
